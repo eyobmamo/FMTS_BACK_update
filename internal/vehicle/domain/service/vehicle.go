@@ -27,7 +27,7 @@ type VehicleService interface {
 	FindByPlateNumber(plate string) (*model.Vehicle, error)
 	CreateVehicle(vehicle model.Vehicle) (*model.Vehicle, error)
 	FindByID(id string) (*model.Vehicle, error)
-	FindAll() ([]*model.Vehicle, error)
+	FindAll(User_ID string) ([]*model.Vehicle, error)
 	UpdateVehicle(vehicle model.Vehicle) error
 	UpdateSoftDelete(id string) error
 }
@@ -73,8 +73,8 @@ func (v *VehicleDomain) FindByID(id string) (*model.Vehicle, error) {
 }
 
 // List all vehicles
-func (v *VehicleDomain) FindAll() ([]*model.Vehicle, error) {
-	vehicles, err := v.vehicleRepo.FindAllVehicles()
+func (v *VehicleDomain) FindAll(User_ID string) ([]*model.Vehicle, error) {
+	vehicles, err := v.vehicleRepo.FindAllVehicles(User_ID)
 	if err != nil {
 		v.logger.Errorf("[FindAll] error: %v", err)
 		return nil, err

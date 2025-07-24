@@ -73,7 +73,10 @@ func (h *VehicleHandler) GetVehicleByID(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *VehicleHandler) ListVehicles(w http.ResponseWriter, r *http.Request) {
-	vehicles, err := h.vehicleService.ListVehicles()
+	// User_id := chi.URLParam(r, "user_id")
+	User_id := r.URL.Query().Get("user_id")
+
+	vehicles, err := h.vehicleService.ListVehicles(User_id)
 	if err != nil {
 		h.logger.Errorf("[ListVehicles] error: %v", err)
 		utility.SendErrorResponse(w, "failed to list vehicles", http.StatusInternalServerError, nil)

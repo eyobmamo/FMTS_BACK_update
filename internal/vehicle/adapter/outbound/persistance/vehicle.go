@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	// "fmt"
+
+	// "fmt"
 	"time"
 
 	dal "FMTS/internal/user/adapter/outbound/infra"
@@ -66,12 +68,21 @@ func (v *VehiclePersistence) FindByID(id string) (*model.Vehicle, error) {
 	return v.vehicleDal.FindOne(ctx, filter, nil)
 }
 
-func (v *VehiclePersistence) FindAllVehicles() ([]*model.Vehicle, error) {
+func (v *VehiclePersistence) FindAllVehicles(User_ID string) ([]*model.Vehicle, error) {
 	filter := bson.M{"is_deleted": false}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
-	return v.vehicleDal.FindAll(ctx, filter, nil)
+	// filter := bson.M{}
+	if User_ID != "" {
+		// objID, err := bson.ObjectIDFromHex(User_ID)
+		// if err != nil {
+		// 	v.logger.Infof("[find all vhicles (persistance) ] can't convert string id to object ID:  %v", err)
+		// 	return nil, fmt.Errorf("INVALED_ID_PROVEDED")
+		// }
+		filter["owner_id"] = User_ID
+	}
+	projection := bson.M{}
+	return v.vehicleDal.FindAll(ctx, filter, projection)
 }
 
 // func (v *VehiclePersistence) FindVehiclesWithFilter(query map[string]interface{}, page, limit int) ([]*model.Vehicle, error) {

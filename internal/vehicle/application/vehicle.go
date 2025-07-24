@@ -13,7 +13,7 @@ import (
 type VehicleService interface {
 	RegisterVehicle(req CreateVehicleRequest, createdBy string) (*model.Vehicle, error)
 	GetVehicleByID(id string) (*model.Vehicle, error)
-	ListVehicles() ([]*model.Vehicle, error)
+	ListVehicles(user_id string) ([]*model.Vehicle, error)
 	UpdateVehicle(id string, req UpdateVehicleRequest) (*model.Vehicle, error)
 	DeleteVehicle(id string) error
 }
@@ -86,8 +86,8 @@ func (s *vehicleServiceImpl) GetVehicleByID(id string) (*model.Vehicle, error) {
 }
 
 // ListVehicles returns all vehicles (pagination/filter can be added later)
-func (s *vehicleServiceImpl) ListVehicles() ([]*model.Vehicle, error) {
-	vehicles, err := s.domain.FindAll()
+func (s *vehicleServiceImpl) ListVehicles(user_ID string) ([]*model.Vehicle, error) {
+	vehicles, err := s.domain.FindAll(user_ID)
 	if err != nil {
 		s.logger.Errorf("[ListVehicles] error: %v", err)
 		return nil, err
