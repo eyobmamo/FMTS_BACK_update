@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func InitUserRoutes(router chi.Router, userHandler inbound.TrackerPortHandler, authMiddleware middleware.AuthMiddleware) {
+func InitTrackerRoutes(router chi.Router, userHandler inbound.TrackerPortHandler, authMiddleware middleware.AuthMiddleware) {
 	router.Route("/tracker", func(r chi.Router) {
 		routes := []route.Route{
 			{
@@ -20,26 +20,26 @@ func InitUserRoutes(router chi.Router, userHandler inbound.TrackerPortHandler, a
 				Handler: userHandler.UpdateLocation,
 				Middlewares: []func(http.Handler) http.Handler{
 					authMiddleware.AuthenticateToken,
-					authMiddleware.AccessControl([]string{"ADMIN"}),
+					authMiddleware.AccessControl([]string{"ADMIN", "USER"}),
 				},
 			},
-			// {
-			// 	Method:  http.MethodGet,
-			// 	Path:    "/{id}",
-			// 	Handler: userHandler.GetUserByID,
-			// 	Middlewares: []func(http.Handler) http.Handler{
-			// 		authMiddleware.AuthenticateToken,
-			// 	},
-			// },
-			// {
-			// 	Method:  http.MethodGet,
-			// 	Path:    "/",
-			// 	Handler: userHandler.ListUsers,
-			// 	Middlewares: []func(http.Handler) http.Handler{
-			// 		authMiddleware.AuthenticateToken,
-			// 		authMiddleware.AccessControl([]string{"ADMIN"}),
-			// 	},
-			// },
+			{
+				Method:  http.MethodGet,
+				Path:    "/{id}",
+				Handler: userHandler.GetLetestViecleByViecleID,
+				// Middlewares: []func(http.Handler) http.Handler{
+				// 	authMiddleware.AuthenticateToken,
+				// },
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/{user_id}",
+				Handler: userHandler.GetLetestLocationsOfViecleByUserID,
+				Middlewares: []func(http.Handler) http.Handler{
+					authMiddleware.AuthenticateToken,
+					authMiddleware.AccessControl([]string{"ADMIN", "USER"}),
+				},
+			},
 			// {
 			// 	Method:  http.MethodPatch,
 			// 	Path:    "/{id}",

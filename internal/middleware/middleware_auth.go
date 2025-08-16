@@ -59,13 +59,20 @@ func (a *authMiddleware) AccessControl(allowedRoles []string) func(http.Handler)
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			role, ok := r.Context().Value(constant.ContextKey("user_role")).(string)
 			if !ok || role == "" {
+				a.logger.Warnf("Role missing from context for request to %s", r.URL.Path)
 				common.SendErrorResponse(w, "unauthorized: role missing", http.StatusUnauthorized, nil)
 				return
 			}
+			
+			a.logger.Infof("Checking access for role: %s, allowed roles: %v", role, allowedRoles)
+			
 			if _, allowed := roleSet[strings.ToUpper(role)]; !allowed {
+				a.logger.Warnf("Access denied for role: %s, allowed roles: %v", role, allowedRoles)
 				common.SendErrorResponse(w, "access denied: invalid role", http.StatusForbidden, nil)
 				return
 			}
+			
+			a.logger.Infof("Access granted for role: %s", role)
 			next.ServeHTTP(w, r)
 		})
 	}
@@ -118,10 +125,16 @@ func (a *authMiddleware) AuthenticateToken(next http.Handler) http.Handler {
 			return
 		}
 
+		// Log the extracted user data for debugging
+		a.logger.Infof("Extracted user data - ID: %s, Role: %s, Name: %s", user.UserID, user.UserRole, user.FullName)
+		
 		ctx := context.WithValue(r.Context(), constant.ContextKey("user_id"), user.UserID)
-		ctx = context.WithValue(ctx, constant.ContextKey("user_role"), user.UserRole)
+		ctx = context.WithValue(ctx, constant.ContextKey("full_name"), user.FullName)
+		ctx = context.WithValue(ctx, constant.ContextKey("user_name"), user.UserName)
 		ctx = context.WithValue(ctx, constant.ContextKey("user_type"), user.UserType)
-		ctx = context.WithValue(ctx, constant.ContextKey("organization_id"), user.OrganizationID)
+		ctx = context.WithValue(ctx, constant.ContextKey("phone_number"), user.PhoneNumber)
+		ctx = context.WithValue(ctx, constant.ContextKey("user_role"), user.UserRole)
+		// ctx = context.WithValue(ctx, constant.ContextKey("organization_id"), user.OrganizationID)
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)

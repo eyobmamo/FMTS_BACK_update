@@ -28,7 +28,7 @@ func ConnectToMongoDB() (*mongo.Client, error) {
 		return nil, err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	if err = client.Ping(ctx, nil); err != nil {

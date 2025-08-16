@@ -2,11 +2,12 @@ package main
 
 import (
 	"FMTS/initiator"
-	"FMTS/kafka"
+	// "FMTS/kafka"
 )
 
 func main() {
-	kafka.Kafka_demo()
+	// GenerateAdminToken()
+	// kafka.Kafka_demo()
 	initiator.Initiator()
 
 }

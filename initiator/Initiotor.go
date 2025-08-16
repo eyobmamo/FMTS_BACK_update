@@ -11,7 +11,9 @@ import (
 	// "FMTS/internal/adapter/inbound/http/responseutil"
 	// "FMTS/pkg/utils"
 
+	"FMTS/utils"
 	util "FMTS/utils"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -32,8 +34,26 @@ func Initiator() {
 	persistence := InitPersistence(mongoClient, "FMTS", logger)
 	logger.Infof("Persistence initialized")
 
+	logger.Infof("Initializing JWT manager...")
+	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	key := os.Getenv("KEY")
+	iv := os.Getenv("IV")
+	
+	if jwtSecretKey == "" {
+		logger.Fatalf("JWT_SECRET_KEY environment variable is not set")
+	}
+	if key == "" {
+		logger.Fatalf("KEY environment variable is not set")
+	}
+	if iv == "" {
+		logger.Fatalf("IV environment variable is not set")
+	}
+	
+	jwtManager := utils.NewJWTManager(jwtSecretKey, 15*time.Minute, 7*24*time.Hour, key, iv) // 15 min access, 7 days refresh
+	logger.Infof("JWT manager initialized")
+
 	logger.Infof("Initializing domain services...")
-	domain := InitDomain(persistence, logger)
+	domain := InitDomain(persistence, logger, jwtManager)
 	logger.Infof("Domain services initialized")
 
 	logger.Infof("Initializing application services...")
@@ -58,14 +78,11 @@ func Initiator() {
 	logger.Infof("Chi router initialized")
 
 	logger.Infof("Initializing routes...")
-	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
-	key := os.Getenv("KEY")
-	iv := os.Getenv("IV")
 	InitRoutes(r, adapter, jwtSecretKey, key, iv, logger)
 	logger.Infof("Routes initialized")
 
 	server := http.Server{
-		Addr:    ":8081",
+		Addr:    ":8082",
 		Handler: r,
 	}
 
