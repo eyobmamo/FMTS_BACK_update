@@ -35,10 +35,10 @@ func NewUserService(domain domain.UserService, logger utils.Logger) UserService 
 // CreateUser handles registration logic with validation and persistence
 func (s *userServiceImpl) CreateUser(req CreateUserRequest, createdBy string) (*model.User, error) {
 	// Step 1: Validate input
-	if err := req.Validate(); err != nil {
-		s.logger.Warnf("[CreateUser] validation failed: %v", err)
-		return nil, err
-	}
+	// if err := req.Validate(); err != nil {
+	// 	s.logger.Warnf("[CreateUser] validation failed: %v", err)
+	// 	return nil, err
+	// }
 
 	// Step 2: Check for duplicates
 	existing, _ := s.domain.FindByEmailOrPhone(req.Email, req.PhoneNumber)
@@ -53,7 +53,7 @@ func (s *userServiceImpl) CreateUser(req CreateUserRequest, createdBy string) (*
 		FaydaID:      req.FaydaID,
 		Email:        req.Email,
 		PhoneNumber:  req.PhoneNumber,
-		CustomerType: model.CustomerTypeIndividual,
+		CustomerType: model.CustomerType(req.CustomerType),
 		IsVerified:   false,
 		IsDisabled:   false,
 		IsDeleted:    false,

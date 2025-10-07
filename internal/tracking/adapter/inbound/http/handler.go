@@ -25,7 +25,7 @@ func InitTrackerRoutes(router chi.Router, userHandler inbound.TrackerPortHandler
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/{id}",
+				Path:    "/{vehicle_id}",
 				Handler: userHandler.GetLetestViecleByViecleID,
 				// Middlewares: []func(http.Handler) http.Handler{
 				// 	authMiddleware.AuthenticateToken,
@@ -33,13 +33,40 @@ func InitTrackerRoutes(router chi.Router, userHandler inbound.TrackerPortHandler
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/{user_id}",
+				Path:    "/",
 				Handler: userHandler.GetLetestLocationsOfViecleByUserID,
 				Middlewares: []func(http.Handler) http.Handler{
 					authMiddleware.AuthenticateToken,
 					authMiddleware.AccessControl([]string{"ADMIN", "USER"}),
 				},
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/{customer_id}/admin/{id}",
+				Handler: userHandler.GetLetestViecleByViecleID,
+				// Middlewares: []func(http.Handler) http.Handler{
+				// 	authMiddleware.AuthenticateToken,
+				// },
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/{user_id}/admin",
+				Handler: userHandler.GetLetestLocationsOfViecleByUserID,
+				Middlewares: []func(http.Handler) http.Handler{
+					authMiddleware.AuthenticateToken,
+					authMiddleware.AccessControl([]string{"ADMIN", "USER"}),
+				},
+			},
+
+			// {
+			// 	Method:  http.MethodGet,
+			// 	Path:    "admin/{user_id}",
+			// 	Handler: userHandler.GetLetestLocationsOfViecleByUserID,
+			// 	Middlewares: []func(http.Handler) http.Handler{
+			// 		authMiddleware.AuthenticateToken,
+			// 		authMiddleware.AccessControl([]string{"ADMIN"}),
+			// 	},
+			// },
 			// {
 			// 	Method:  http.MethodPatch,
 			// 	Path:    "/{id}",

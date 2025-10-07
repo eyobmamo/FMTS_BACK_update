@@ -59,7 +59,9 @@ func (j *jwtManager) encryptUserData(user *entity.User) (string, error) {
 	case "individual":
 		userRole = "USER"
 	case "company":
-		userRole = "FLEET_MANAGER" // Companies can manage fleets
+		userRole = "FLEET_MANAGER"
+	case "admin":
+		userRole = "ADMIN" // Companies can manage fleets
 	default:
 		userRole = "USER" // Default to USER for safety
 	}
@@ -72,8 +74,8 @@ func (j *jwtManager) encryptUserData(user *entity.User) (string, error) {
 		UserID:         user.ID.Hex(),
 		UserRole:       userRole,
 		FullName:       user.FullName,
-		UserName:       user.FullName, // Using FullName as UserName
-		OrganizationID: "",            // Set empty string if not available
+		UserName:       user.FullName,             // Using FullName as UserName
+		OrganizationID: "",                        // Set empty string if not available
 		UserType:       string(user.CustomerType), // Using CustomerType as UserType
 		PhoneNumber:    user.PhoneNumber,
 	}
@@ -110,7 +112,7 @@ func (j *jwtManager) GenerateAccessToken(user *entity.User) (string, error) {
 
 	claims := jwt.MapClaims{
 		"data": encryptedData,
-		"exp":  time.Now().Add(j.accessTokenTTL).Unix(),
+		"exp":  time.Now().Add(6 * time.Hour).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(j.secretKey))

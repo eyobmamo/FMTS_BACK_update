@@ -28,7 +28,7 @@ type VehicleService interface {
 	CreateVehicle(vehicle model.Vehicle) (*model.Vehicle, error)
 	FindByID(id string) (*model.Vehicle, error)
 	FindAll(User_ID string) ([]*model.Vehicle, error)
-	UpdateVehicle(vehicle model.Vehicle) error
+	UpdateVehicle(vehicle model.Vehicle) (model.Vehicle, error)
 	UpdateSoftDelete(id string) error
 }
 
@@ -83,14 +83,15 @@ func (v *VehicleDomain) FindAll(User_ID string) ([]*model.Vehicle, error) {
 }
 
 // Update existing vehicle
-func (v *VehicleDomain) UpdateVehicle(vehicle model.Vehicle) error {
+func (v *VehicleDomain) UpdateVehicle(vehicle model.Vehicle) (model.Vehicle, error) {
 	vehicle.UpdatedAt = time.Now()
 
-	if err := v.vehicleRepo.UpdateVehicle(vehicle); err != nil {
+	updated, err := v.vehicleRepo.UpdateVehicle(vehicle)
+	if err != nil {
 		v.logger.Errorf("[UpdateVehicle] error updating vehicle: %v", err)
-		return err
+		return model.Vehicle{}, err
 	}
-	return nil
+	return updated, nil
 }
 
 // Soft delete vehicle

@@ -29,6 +29,7 @@ func InitUserRoutes(router chi.Router, userHandler inbound.UserPortHandler, auth
 				Handler: userHandler.GetUserByID,
 				Middlewares: []func(http.Handler) http.Handler{
 					authMiddleware.AuthenticateToken,
+					authMiddleware.AccessControl([]string{"ADMIN", "USER"}),
 				},
 			},
 			{
@@ -46,6 +47,7 @@ func InitUserRoutes(router chi.Router, userHandler inbound.UserPortHandler, auth
 				Handler: userHandler.UpdateUser,
 				Middlewares: []func(http.Handler) http.Handler{
 					authMiddleware.AuthenticateToken,
+					authMiddleware.AccessControl([]string{"ADMIN", "USER"}),
 				},
 			},
 			{

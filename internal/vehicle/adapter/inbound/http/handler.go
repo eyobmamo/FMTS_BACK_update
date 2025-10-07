@@ -37,12 +37,22 @@ func InitVehicleRoutes(router chi.Router, vehicleHandler inbound.VehiclePortInte
 				Handler: vehicleHandler.ListVehicles,
 				Middlewares: []func(http.Handler) http.Handler{
 					authMiddleware.AuthenticateToken,
-					authMiddleware.AccessControl([]string{"ADMIN", "FLEET_MANAGER"}),
+					authMiddleware.AccessControl([]string{"ADMIN", "FLEET_MANAGER", "USER"}),
+				},
+			},
+
+			{
+				Method:  http.MethodGet,
+				Path:    "/admin/{user_id}",
+				Handler: vehicleHandler.ListVehicles,
+				Middlewares: []func(http.Handler) http.Handler{
+					authMiddleware.AuthenticateToken,
+					authMiddleware.AccessControl([]string{"ADMIN"}),
 				},
 			},
 			{
 				Method:  http.MethodPatch,
-				Path:    "/{id}",
+				Path:    "/admin/{id}",
 				Handler: vehicleHandler.UpdateVehicle,
 				Middlewares: []func(http.Handler) http.Handler{
 					authMiddleware.AuthenticateToken,

@@ -15,7 +15,7 @@ type VehicleService interface {
 	GetVehicleByID(id string) (*model.Vehicle, error)
 	ListVehicles(user_id string) ([]*model.Vehicle, error)
 	UpdateVehicle(id string, req UpdateVehicleRequest) (*model.Vehicle, error)
-	DeleteVehicle(id string) error
+	DeleteVehicle(id string) (model.Vehicle, error)
 }
 
 type vehicleServiceImpl struct {
@@ -97,9 +97,9 @@ func (s *vehicleServiceImpl) ListVehicles(user_ID string) ([]*model.Vehicle, err
 
 // UpdateVehicle updates allowed fields for a vehicle
 func (s *vehicleServiceImpl) UpdateVehicle(id string, req UpdateVehicleRequest) (*model.Vehicle, error) {
-	if err := req.Validate(); err != nil {
-		return nil, err
-	}
+	// if err := req.Validate(); err != nil {
+	// 	return nil, err
+	// }
 
 	vehicle, err := s.domain.FindByID(id)
 	if err != nil {
@@ -107,9 +107,9 @@ func (s *vehicleServiceImpl) UpdateVehicle(id string, req UpdateVehicleRequest) 
 	}
 
 	// Update fields if present in the request
-	if req.OwnerID != nil {
-		vehicle.OwnerID = *req.OwnerID
-	}
+	// if req.OwnerID != nil {
+	// 	vehicle.OwnerID = *req.OwnerID
+	// }
 	// if req.OwnerType != nil {
 	// 	vehicle.OwnerType = *req.OwnerType
 	// }
@@ -140,33 +140,22 @@ func (s *vehicleServiceImpl) UpdateVehicle(id string, req UpdateVehicleRequest) 
 	if req.ImageURL != nil {
 		vehicle.ImageURL = *req.ImageURL
 	}
-	if req.CurrentlyTracked != nil {
-		vehicle.CurrentlyTracked = *req.CurrentlyTracked
-	}
-	if req.IsDisabled != nil {
-		vehicle.IsDisabled = *req.IsDisabled
-	}
-	if req.DisabledReason != nil {
-		vehicle.DisabledReason = *req.DisabledReason
-	}
-	if req.NotTrackedReason != nil {
-		vehicle.NotTrackedReason = *req.NotTrackedReason
-	}
 
 	vehicle.UpdatedAt = time.Now()
 
-	if err := s.domain.UpdateVehicle(*vehicle); err != nil {
+	updatedVehicle, err := s.domain.UpdateVehicle(*vehicle)
+	if err != nil {
 		return nil, err
 	}
 
-	return vehicle, nil
+	return &updatedVehicle, nil
 }
 
 // DeleteVehicle marks vehicle as deleted (soft delete)
-func (s *vehicleServiceImpl) DeleteVehicle(id string) error {
+func (s *vehicleServiceImpl) DeleteVehicle(id string) (model.Vehicle, error) {
 	vehicle, err := s.domain.FindByID(id)
 	if err != nil {
-		return err
+		return model.Vehicle{}, err
 	}
 
 	vehicle.IsDeleted = true

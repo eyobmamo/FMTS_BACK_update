@@ -3,6 +3,7 @@ package vehicle
 import (
 	"context"
 	"errors"
+
 	// "fmt"
 
 	// "fmt"
@@ -117,19 +118,61 @@ func (v *VehiclePersistence) FindVehiclesWithFilter(query map[string]interface{}
 	return v.vehicleDal.FindAllWithPagination(ctx, filter, projection, skip, limit64)
 }
 
-func (v *VehiclePersistence) UpdateVehicle(vehicle model.Vehicle) error {
+func (v *VehiclePersistence) UpdateVehicle(vehicle model.Vehicle) (model.Vehicle, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	filter := bson.M{"_id": vehicle.ID}
-	update := bson.M{"$set": vehicle}
+	// always update UpdatedAt
+	vehicle.UpdatedAt = time.Now()
 
-	_, err := v.vehicleDal.UpdateOne(ctx, filter, update)
+	filter := bson.M{"_id": vehicle.ID}
+
+	// build update map only with non-zero values
+	update := bson.M{}
+
+	// if vehicle.OwnerID != "" {
+	// 	update["owner_id"] = vehicle.OwnerID
+	// }
+	if vehicle.OwnerType != "" {
+		update["owner_type"] = vehicle.OwnerType
+	}
+	if vehicle.PlateNumber != "" {
+		update["plate_number"] = vehicle.PlateNumber
+	}
+	if vehicle.VehicleType != "" {
+		update["vehicle_type"] = vehicle.VehicleType
+	}
+	if vehicle.Model != "" {
+		update["model"] = vehicle.Model
+	}
+	if vehicle.Manufacturer != "" {
+		update["manufacturer"] = vehicle.Manufacturer
+	}
+	if vehicle.Year != 0 {
+		update["year"] = vehicle.Year
+	}
+	if vehicle.Color != "" {
+		update["color"] = vehicle.Color
+	}
+	if vehicle.DriverName != "" {
+		update["driver_name"] = vehicle.DriverName
+	}
+	if vehicle.DriverPhone != "" {
+		update["driver_phone"] = vehicle.DriverPhone
+	}
+	if vehicle.ImageURL != "" {
+		update["image_url"] = vehicle.ImageURL
+	}
+
+	// ✅ always update UpdatedAt
+	update["updated_at"] = vehicle.UpdatedAt
+
+	updatedVehicle, err := v.vehicleDal.UpdateOne(ctx, filter, update)
 	if err != nil {
 		v.logger.Errorf("[UpdateVehicle] update error: %v", err)
-		return err
+		return model.Vehicle{}, err
 	}
-	return nil
+	return updatedVehicle, nil
 }
 
 func (v *VehiclePersistence) UpdateSoftDelete(id string) error {

@@ -23,7 +23,7 @@ func ExtractUserContext(r *http.Request) UserContext {
 	}
 
 	return UserContext{
-		UserCode:    get("user_code"),
+		// UserCode:    get("user_code"),
 		UserID:      get("user_id"),
 		FullName:    get("full_name"),
 		PhoneNumber: get("phone_number"),

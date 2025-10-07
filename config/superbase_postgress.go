@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
@@ -18,7 +19,17 @@ func LoadConfig() string {
 }
 
 func ConnectSupabasePool(connString string) *pgxpool.Pool {
-	pool, err := pgxpool.New(context.Background(), connString)
+	ctx := context.Background()
+
+	cfg, err := pgxpool.ParseConfig(connString)
+	if err != nil {
+		log.Fatalf("Unable to parse database config: %v\n", err)
+	}
+
+	// Use simple protocol to avoid server-side prepared statements with PgBouncer (transaction pooling)
+	cfg.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeSimpleProtocol
+
+	pool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		log.Fatalf("Unable to connect to database pool: %v\n", err)
 	}

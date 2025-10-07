@@ -15,6 +15,7 @@ import (
 	// domain "FMTS/internal/user/domain/service"
 	dto "FMTS/internal/vehicle/application"
 	// model "FMTS/internal/vehicle/domain/entity"
+	contexts "FMTS/pkg/context"
 	"FMTS/pkg/utils"
 )
 
@@ -74,9 +75,23 @@ func (h *VehicleHandler) GetVehicleByID(w http.ResponseWriter, r *http.Request) 
 
 func (h *VehicleHandler) ListVehicles(w http.ResponseWriter, r *http.Request) {
 	// User_id := chi.URLParam(r, "user_id")
-	User_id := r.URL.Query().Get("user_id")
+	// User_id := r.URL.Query().Get("user_id")
 
-	vehicles, err := h.vehicleService.ListVehicles(User_id)
+	userInfo := contexts.ExtractUserContext(r)
+	fmt.Printf("user_Info: %v", userInfo.UserID)
+	userID := userInfo.UserID
+	// if userInfo.UserRole == "ADMIN" {
+	// 	// Fallback: allow passing user_id via URL param if needed
+	// 	userID = chi.URLParam(r, "user_id")
+	// }
+
+	if userID == "" {
+		h.logger.Warnf("[GetLetestLocationsOfViecleByUserID] user_id not found in context or path param")
+		utility.SendErrorResponse(w, "user_id not found", http.StatusBadRequest, nil)
+		return
+	}
+
+	vehicles, err := h.vehicleService.ListVehicles(userID)
 	if err != nil {
 		h.logger.Errorf("[ListVehicles] error: %v", err)
 		utility.SendErrorResponse(w, "failed to list vehicles", http.StatusInternalServerError, nil)
@@ -93,12 +108,12 @@ func (h *VehicleHandler) UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 		utility.SendErrorResponse(w, "invalid input", http.StatusBadRequest, nil)
 		return
 	}
-
-	if err := req.Validate(); err != nil {
-		h.logger.Warnf("[UpdateVehicle] validation error: %v", err)
-		utility.SendErrorResponse(w, err.Error(), http.StatusBadRequest, nil)
-		return
-	}
+	// fmt.Println("[UpdateVehicle] updating vehicle with ID:", id, "request:", req)
+	// if err := req.Validate(); err != nil {
+	// 	h.logger.Warnf("[UpdateVehicle] validation error: %v", err)
+	// 	utility.SendErrorResponse(w, err.Error(), http.StatusBadRequest, nil)
+	// 	return
+	// }
 
 	updated, err := h.vehicleService.UpdateVehicle(id, req)
 	if err != nil {
@@ -112,7 +127,7 @@ func (h *VehicleHandler) UpdateVehicle(w http.ResponseWriter, r *http.Request) {
 
 func (h *VehicleHandler) DeleteVehicle(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	err := h.vehicleService.DeleteVehicle(id)
+	_, err := h.vehicleService.DeleteVehicle(id)
 	if err != nil {
 		h.logger.Errorf("[DeleteVehicle] error: %v", err)
 		utility.SendErrorResponse(w, err.Error(), http.StatusInternalServerError, nil)

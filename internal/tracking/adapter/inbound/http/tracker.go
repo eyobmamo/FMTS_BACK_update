@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net/http"
 
+	contexts "FMTS/pkg/context"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -52,6 +53,12 @@ func (h *TrackerHandler) UpdateLocation(w http.ResponseWriter, r *http.Request) 
 
 func (h *TrackerHandler) GetLetestViecleByViecleID(w http.ResponseWriter, r *http.Request) {
 	vehicleID := chi.URLParam(r, "vehicle_id")
+	if vehicleID == "" {
+		h.logger.Warnf("[GetLetestViecleByViecleID] vehicle_id is empty or missing")
+		utility.SendErrorResponse(w, "vehicle_id is required and cannot be empty", http.StatusBadRequest, nil)
+		return
+	}
+
 	location, err := h.AppTracker.GetLatestVehicleLocationByID(r.Context(), vehicleID)
 	if err != nil {
 		h.logger.Errorf("[GetLatestVehicleByVehicleID] failed: %v", err)
@@ -62,14 +69,23 @@ func (h *TrackerHandler) GetLetestViecleByViecleID(w http.ResponseWriter, r *htt
 }
 
 func (h *TrackerHandler) GetLetestLocationsOfViecleByUserID(w http.ResponseWriter, r *http.Request) {
-	// userID, ok := r.Context().Value("user_id").(string)
-	// if !ok || userID == "" {
-	// 	h.logger.Warnf("[GetLetestLocationsOfViecleByUserID] user_id not found in context")
-	// 	utility.SendErrorResponse(w, "user_id not found in context", http.StatusBadRequest, nil)
-	// 	return
-	// }
+	// Extract user context using the same typed keys set by middleware
+	u := contexts.ExtractUserContext(r)
+	userID := u.UserID
+	fmt.Println("_______________________________________________")
+	fmt.Printf("user_id:%v", u.UserRole)
+	if u.UserRole == "admin" {
+		// Fallback: allow passing user_id via URL param if needed
+		userID = chi.URLParam(r, "user_id")
+	}
 
-	userID := "687ab88a9a3d33a856cd5000"
+	if userID == "" {
+		h.logger.Warnf("[GetLetestLocationsOfViecleByUserID] user_id not found in context or path param")
+		utility.SendErrorResponse(w, "user_id not found", http.StatusBadRequest, nil)
+		return
+	}
+
+	// userID := "687ab88a9a3d33a856cd5000"
 	fmt.Printf("user id: %v", userID)
 	locations, err := h.AppTracker.GetLatestVehicleLocationsByUserID(r.Context(), userID)
 	if err != nil {

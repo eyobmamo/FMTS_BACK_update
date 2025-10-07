@@ -40,7 +40,7 @@ func (r *TimescaleTrackerRepo) UpdateLocation(ctx context.Context, location enti
 }
 
 func (r *TimescaleTrackerRepo) GetLatestVehicleLocationByID(ctx context.Context, vehicleID string) (entity.VehicleLocation, error) {
-	fmt.Printf("vehile ID : %v", vehicleID)
+	fmt.Printf("vehile ID form repo : %v", vehicleID)
 	const query = `
         SELECT owner_id, vehicle_id, latitude, longitude, speed, timestamp
         FROM vehicle_locations
@@ -50,7 +50,8 @@ func (r *TimescaleTrackerRepo) GetLatestVehicleLocationByID(ctx context.Context,
     `
 
 	var loc entity.VehicleLocation
-	err := r.db.QueryRow(ctx, query, "6881554e4f64d5fd1c00ba5b").Scan(
+	fmt.Printf("vehicleID : %v", vehicleID)
+	err := r.db.QueryRow(ctx, query, vehicleID).Scan(
 		&loc.OwnerID,
 		&loc.VehicleID,
 		&loc.Latitude,

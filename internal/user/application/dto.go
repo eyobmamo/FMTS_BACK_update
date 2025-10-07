@@ -28,7 +28,7 @@ func (c *CreateUserRequest) Validate() error {
 		validation.Field(&c.FaydaID, validation.Required),
 		validation.Field(&c.Email, validation.Required, is.Email),
 		validation.Field(&c.PhoneNumber, validation.Required, is.E164),
-		validation.Field(&c.CustomerType, validation.Required, validation.In("individual", "company")),
+		validation.Field(&c.CustomerType, validation.Required, validation.In("individual", "company", "admin")),
 	)
 }
 

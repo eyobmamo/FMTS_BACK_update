@@ -10,6 +10,6 @@ type VehicleRepo interface {
 	CreateVehicle(vehicle model.Vehicle) (*model.Vehicle, error)
 	FindByID(id string) (*model.Vehicle, error)
 	FindAllVehicles(User_ID string) ([]*model.Vehicle, error)
-	UpdateVehicle(vehicle model.Vehicle) error
+	UpdateVehicle(vehicle model.Vehicle) (model.Vehicle, error)
 	UpdateSoftDelete(id string) error
 }

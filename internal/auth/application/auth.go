@@ -78,12 +78,12 @@ func (s *authServiceImpl) Login(req dto.LoginRequest) (*dto.AuthTokens, error) {
 	if err != nil || user == nil {
 		fmt.Println(" step 1")
 
-		return nil, errors.New("invalid credentials")
+		return nil, errors.New("invalid credentials not find email")
 	}
 
 	if !utils.CheckPasswordHash(req.Password, user.HashedPassword) {
 		fmt.Println(" step 2")
-		return nil, errors.New("invalid credentials")
+		return nil, errors.New("invalid credentials hash  ps not equal with givend  given ")
 	}
 
 	tokens, err := s.domain.GenerateTokens(user)
