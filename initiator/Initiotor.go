@@ -38,7 +38,7 @@ func Initiator() {
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
 	key := os.Getenv("KEY")
 	iv := os.Getenv("IV")
-	
+
 	if jwtSecretKey == "" {
 		logger.Fatalf("JWT_SECRET_KEY environment variable is not set")
 	}
@@ -48,7 +48,7 @@ func Initiator() {
 	if iv == "" {
 		logger.Fatalf("IV environment variable is not set")
 	}
-	
+
 	jwtManager := utils.NewJWTManager(jwtSecretKey, 15*time.Minute, 7*24*time.Hour, key, iv) // 15 min access, 7 days refresh
 	logger.Infof("JWT manager initialized")
 
@@ -81,8 +81,13 @@ func Initiator() {
 	InitRoutes(r, adapter, jwtSecretKey, key, iv, logger)
 	logger.Infof("Routes initialized")
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8082" // for local development
+	}
+	println(port)
 	server := http.Server{
-		Addr:    ":8082",
+		Addr:    ":" + port,
 		Handler: r,
 	}
 
